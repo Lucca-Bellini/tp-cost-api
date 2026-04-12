@@ -43,90 +43,100 @@ public class TPCostCalculationService {
 
         @Transactional(readOnly = true)
         public TPCostResponseDto calcularCusto(TPCostRequestDto request) {
-                // 1. Carretel e Núcleo
-                Carretel carretel = carretelRepository.findByTamanho(request.getCarretel())
-                                .orElseThrow(
-                                                () -> new RuntimeException("Carretel não encontrado para o tamanho: "
-                                                                + request.getCarretel()));
-                String tipoNucleo = request.getTensaoMaxima() + "kV "
-                                + (request.getTipoLigacao().equals("Fase-Terra") ? "FT" : "FF");
-                Nucleo nucleo = nucleoRepository.findByTipo(tipoNucleo)
-                                .orElseThrow(() -> new RuntimeException(
-                                                "Núcleo não encontrado para o tipo: " + tipoNucleo));
+                try {
+                        // 1. Carretel e Núcleo
+                        Carretel carretel = carretelRepository.findByTamanho(request.getCarretel())
+                                        .orElseThrow(
+                                                        () -> new RuntimeException(
+                                                                        "Carretel não encontrado para o tamanho: "
+                                                                                        + request.getCarretel()));
+                        String tipoNucleo = request.getTensaoMaxima() + "kV "
+                                        + (request.getTipoLigacao().equals("Fase-Terra") ? "FT" : "FF");
+                        Nucleo nucleo = nucleoRepository.findByTipo(tipoNucleo)
+                                        .orElseThrow(() -> new RuntimeException(
+                                                        "Núcleo não encontrado para o tipo: " + tipoNucleo));
 
-                // 2. Fios (primário e secundário) - vamos modificar o método para retornar um
-                // objeto com custo, massa, camadas, raio médio
-                FioResult fioPrimario = calcularFioPrimario(request, carretel);
-                FioResult fioSecundario = calcularFioSecundario(request, carretel);
+                        // 2. Fios (primário e secundário) - vamos modificar o método para retornar um
+                        // objeto com custo, massa, camadas, raio médio
+                        FioResult fioPrimario = calcularFioPrimario(request, carretel);
+                        FioResult fioSecundario = calcularFioSecundario(request, carretel);
 
-                // 3. Borracha
-                BigDecimal[] borracha = calcularCustoEMassaBorracha(carretel, fioSecundario.getRaioMedioMm(),
-                                fioSecundario.getNumeroCamadas());
+                        // 3. Borracha
+                        BigDecimal[] borracha = calcularCustoEMassaBorracha(carretel, fioSecundario.getRaioMedioMm(),
+                                        fioSecundario.getNumeroCamadas());
 
-                // 4. Papel, verniz, cola
-                BigDecimal[] papelVernizCola = calcularCustoEMassaPapelVernizCola(fioPrimario.getNumeroCamadas(),
-                                fioSecundario.getNumeroCamadas());
+                        // 4. Papel, verniz, cola
+                        BigDecimal[] papelVernizCola = calcularCustoEMassaPapelVernizCola(
+                                        fioPrimario.getNumeroCamadas(),
+                                        fioSecundario.getNumeroCamadas());
 
-                // 5. Cano
-                BigDecimal[] cano = calcularCustoEMassaCano(carretel);
+                        // 5. Cano
+                        BigDecimal[] cano = calcularCustoEMassaCano(carretel);
 
-                // 6. Núcleo + cinta
-                BigDecimal custoNucleoKg = produtoFornecedorRepository.findLowestPriceByProdutoCodigo("INS-049")
-                                .orElse(BigDecimal.ZERO);
-                BigDecimal custoNucleo = nucleo.getMassaKg().multiply(custoNucleoKg);
-                BigDecimal[] cintaNucleo = calcularCustoEMassaCintaNucleo(nucleo);
-                BigDecimal massaNucleoTotal = nucleo.getMassaKg().add(cintaNucleo[1]);
-                BigDecimal custoNucleoTotal = custoNucleo.add(cintaNucleo[0]);
+                        // 6. Núcleo + cinta
+                        BigDecimal custoNucleoKg = produtoFornecedorRepository.findLowestPriceByProdutoCodigo("INS-049")
+                                        .orElse(BigDecimal.ZERO);
+                        BigDecimal custoNucleo = nucleo.getMassaKg().multiply(custoNucleoKg);
+                        BigDecimal[] cintaNucleo = calcularCustoEMassaCintaNucleo(nucleo);
+                        BigDecimal massaNucleoTotal = nucleo.getMassaKg().add(cintaNucleo[1]);
+                        BigDecimal custoNucleoTotal = custoNucleo.add(cintaNucleo[0]);
 
-                // 7. Chapa de latão
-                BigDecimal precoChapaKg = produtoFornecedorRepository.findLowestPriceByProdutoCodigo("INS-048")
-                                .orElse(BigDecimal.ZERO);
-                BigDecimal custoChapa = carretel.getFitaLataoMassaKg().multiply(precoChapaKg);
-                BigDecimal massaChapa = carretel.getFitaLataoMassaKg();
+                        // 7. Chapa de latão
+                        BigDecimal precoChapaKg = produtoFornecedorRepository.findLowestPriceByProdutoCodigo("INS-048")
+                                        .orElse(BigDecimal.ZERO);
+                        BigDecimal custoChapa = carretel.getFitaLataoMassaKg().multiply(precoChapaKg);
+                        BigDecimal massaChapa = carretel.getFitaLataoMassaKg();
 
-                // 8. Acolchoamento poliuretano
-                BigDecimal[] poliuretano = calcularCustoEMassaPoliuretano();
+                        // 8. Acolchoamento poliuretano
+                        BigDecimal[] poliuretano = calcularCustoEMassaPoliuretano();
 
-                // 9. Resina epóxi
-                BigDecimal[] epoxi = calcularCustoEMassaEpoxi(carretel, request);
-                BigDecimal custoEpoxi = epoxi[0];
-                BigDecimal massaEpoxi = epoxi[1];
+                        // 9. Resina epóxi
+                        BigDecimal[] epoxi = calcularCustoEMassaEpoxi(carretel, request);
+                        BigDecimal custoEpoxi = epoxi[0];
+                        BigDecimal massaEpoxi = epoxi[1];
 
-                // 10. Insumos simples
-                BigDecimal custoInsumos = calcularCustoInsumos(request.getInsumos());
-                BigDecimal massaInsumos = calcularMassaInsumos(request.getInsumos());
+                        // 10. Insumos simples
+                        BigDecimal custoInsumos = calcularCustoInsumos(request.getInsumos());
+                        BigDecimal massaInsumos = calcularMassaInsumos(request.getInsumos());
 
-                // 11. Totais
-                BigDecimal custoTotalMateriais = fioPrimario.getCusto()
-                                .add(fioSecundario.getCusto())
-                                .add(borracha[0])
-                                .add(papelVernizCola[0])
-                                .add(cano[0])
-                                .add(custoNucleoTotal)
-                                .add(custoChapa)
-                                .add(poliuretano[0])
-                                .add(custoEpoxi)
-                                .add(custoInsumos);
+                        // 11. Totais
+                        BigDecimal custoTotalMateriais = fioPrimario.getCusto()
+                                        .add(fioSecundario.getCusto())
+                                        .add(borracha[0])
+                                        .add(papelVernizCola[0])
+                                        .add(cano[0])
+                                        .add(custoNucleoTotal)
+                                        .add(custoChapa)
+                                        .add(poliuretano[0])
+                                        .add(custoEpoxi)
+                                        .add(custoInsumos);
 
-                BigDecimal massaTotal = fioPrimario.getMassa()
-                                .add(fioSecundario.getMassa())
-                                .add(borracha[1])
-                                .add(papelVernizCola[1])
-                                .add(cano[1])
-                                .add(massaNucleoTotal)
-                                .add(massaChapa)
-                                .add(poliuretano[1])
-                                .add(massaEpoxi)
-                                .add(massaInsumos);
+                        BigDecimal massaTotal = fioPrimario.getMassa()
+                                        .add(fioSecundario.getMassa())
+                                        .add(borracha[1])
+                                        .add(papelVernizCola[1])
+                                        .add(cano[1])
+                                        .add(massaNucleoTotal)
+                                        .add(massaChapa)
+                                        .add(poliuretano[1])
+                                        .add(massaEpoxi)
+                                        .add(massaInsumos);
 
-                BigDecimal custoMaoDeObra = massaTotal.multiply(PRECO_MAO_DE_OBRA_POR_KG);
-                BigDecimal custoTotal = custoTotalMateriais.add(custoMaoDeObra).add(CUSTO_INDIRETO_FIXO);
+                        BigDecimal custoMaoDeObra = massaTotal.multiply(PRECO_MAO_DE_OBRA_POR_KG);
+                        BigDecimal custoTotal = custoTotalMateriais.add(custoMaoDeObra).add(CUSTO_INDIRETO_FIXO);
 
-                return TPCostResponseDto.builder()
-                                .sucesso(true)
-                                .mensagem("Custo de fabricação calculado com sucesso")
-                                .custoTotal(custoTotal)
-                                .build();
+                        return TPCostResponseDto.builder()
+                                        .sucesso(true)
+                                        .mensagem("Custo de fabricação calculado com sucesso")
+                                        .custoTotal(custoTotal)
+                                        .build();
+                } catch (Exception e) {
+                        log.error("Erro no cálculo", e);
+                        return TPCostResponseDto.builder()
+                                        .sucesso(false)
+                                        .mensagem("Erro no cálculo: " + e.getMessage())
+                                        .build();
+                }
         }
 
         private FioResult calcularCustoFio(ProdutoCobre fio, Integer espirasTotal,
