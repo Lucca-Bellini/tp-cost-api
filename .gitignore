@@ -1,0 +1,35 @@
+# Compiled output
+/target/
+*.class
+
+# Log files
+*.log
+
+# IDE files
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# Maven
+log/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Environment files (importante: não suba credentials)
+application-local.yml
+application-dev.yml
+*.secret
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db
