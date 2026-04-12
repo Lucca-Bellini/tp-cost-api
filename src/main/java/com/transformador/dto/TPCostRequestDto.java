@@ -21,12 +21,6 @@ public class TPCostRequestDto {
     @Positive(message = "Espiras primário deve ser positivo")
     private Integer espirasPrimario;
 
-    @NotBlank(message = "Molde é obrigatório")
-    private String molde; // ex: "TP TERRA 13"
-
-    @NotBlank(message = "Desenho Técnico é obrigatório")
-    private String desenhoTecnico; // ex: "T-13-01"
-
     @NotNull(message = "AWG secundário é obrigatório")
     @Positive(message = "AWG secundário deve ser positivo")
     private Integer awgSecundario;
@@ -36,6 +30,7 @@ public class TPCostRequestDto {
     private Integer espirasSecundario;
 
     @NotBlank(message = "Tipo de ligação é obrigatório")
+    @Pattern(regexp = "^(Fase-Terra|Fase-Fase)$", message = "Tipo de ligação deve ser Fase-Terra ou Fase-Fase")
     private String tipoLigacao; // "Fase-Terra" ou "Fase-Fase"
 
     @NotNull(message = "Número de isoladores é obrigatório")
@@ -49,9 +44,6 @@ public class TPCostRequestDto {
     @NotBlank(message = "Carretel é obrigatório")
     @Pattern(regexp = "^(P|M|G)$", message = "Carretel deve ser P, M ou G")
     private String carretel; // P, M, G
-
-    @NotBlank(message = "Tipo de uso é obrigatório")
-    private String tipoUso; // "Interno" ou "Externo"
 
     // Lista de insumos simples (parafusos, insertos, etc.)
     private List<InsumoRequestDto> insumos;

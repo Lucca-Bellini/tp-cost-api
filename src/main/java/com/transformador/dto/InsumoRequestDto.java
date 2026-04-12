@@ -15,6 +15,4 @@ public class InsumoRequestDto {
     @NotNull(message = "Quantidade é obrigatória")
     @Positive(message = "Quantidade deve ser positiva")
     private BigDecimal quantidade;
-
-    private String unidade; // opcional (PÇ, KG, M)
 }

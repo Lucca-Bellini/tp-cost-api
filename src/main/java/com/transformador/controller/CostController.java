@@ -19,7 +19,7 @@ public class CostController {
 
     @PostMapping("/calculate")
     public ResponseEntity<TPCostResponseDto> calculateCost(@Valid @RequestBody TPCostRequestDto request) {
-        log.info("Recebida requisição de cálculo para molde: {}", request.getMolde());
+        log.info("Recebida requisição de cálculo.");
         TPCostResponseDto response = calculationService.calcularCusto(request);
         if (response.isSucesso()) {
             return ResponseEntity.ok(response);
