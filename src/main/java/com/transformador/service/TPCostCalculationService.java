@@ -56,8 +56,8 @@ public class TPCostCalculationService {
                                         .orElseThrow(() -> new RuntimeException(
                                                         "Núcleo não encontrado para o tipo: " + tipoNucleo));
 
-                        // 2. Fios (primário e secundário) - vamos modificar o método para retornar um
-                        // objeto com custo, massa, camadas, raio médio
+                        // 2. Fios (primário e secundário) - retorna um objeto com custo, massa,
+                        // camadas, raio médio
                         FioResult fioPrimario = calcularFioPrimario(request, carretel);
                         FioResult fioSecundario = calcularFioSecundario(request, carretel);
 
