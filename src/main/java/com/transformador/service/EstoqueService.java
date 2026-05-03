@@ -7,8 +7,10 @@ import com.transformador.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,18 +29,29 @@ public class EstoqueService {
      * @throws RuntimeException             se produto não encontrado
      * @throws EstoqueInsuficienteException se estoque insuficiente
      */
+    @Transactional
     public void validarEDebitar(List<InsumoRequestDto> insumos) {
+        List<String> erros = new ArrayList<>();
+
         // 1. Validação de estoque para todos os insumos
         for (InsumoRequestDto insumo : insumos) {
-            Produto produto = produtoRepository.findByCodigo(insumo.getIdInsumo())
-                    .orElseThrow(
-                            () -> new EstoqueInsuficienteException("Produto não encontrado: " + insumo.getIdInsumo()));
-            BigDecimal estoqueAtual = produto.getEstoque() != null ? produto.getEstoque() : BigDecimal.ZERO;
-            if (estoqueAtual.compareTo(insumo.getQuantidade()) < 0) {
-                throw new EstoqueInsuficienteException(String.format(
-                        "Estoque insuficiente para %s (%s): disponível = %.3f, necessário = %.3f",
-                        produto.getNome(), insumo.getIdInsumo(), estoqueAtual, insumo.getQuantidade()));
+            try {
+                Produto produto = produtoRepository.findByCodigo(insumo.getIdInsumo())
+                        .orElseThrow(() -> new EstoqueInsuficienteException(
+                                "Produto não encontrado: " + insumo.getIdInsumo()));
+                BigDecimal estoqueAtual = produto.getEstoque() != null ? produto.getEstoque() : BigDecimal.ZERO;
+                if (estoqueAtual.compareTo(insumo.getQuantidade()) < 0) {
+                    erros.add(String.format("Estoque insuficiente para %s (%s): disponível = %.3f, necessário = %.3f",
+                            produto.getNome(), insumo.getIdInsumo(), estoqueAtual, insumo.getQuantidade()));
+                }
+            } catch (EstoqueInsuficienteException e) {
+                erros.add("Produto não encontrado: " + insumo.getIdInsumo());
             }
+        }
+
+        // Se houver erros, lança uma única exceção com todos eles
+        if (!erros.isEmpty()) {
+            throw new EstoqueInsuficienteException(String.join("; ", erros));
         }
 
         // 2. Débito (apenas após validação bem‑sucedida)
@@ -47,7 +60,8 @@ public class EstoqueService {
             BigDecimal novoEstoque = produto.getEstoque().subtract(insumo.getQuantidade());
             produto.setEstoque(novoEstoque);
             produtoRepository.save(produto);
-            log.info("Estoque debitado: {} - nova quantidade = {}", insumo.getIdInsumo(), novoEstoque);
+            log.info("Estoque debitado: {} - nova quantidade = {}", insumo.getIdInsumo(),
+                    String.format("%.3f", novoEstoque));
         }
     }
 }
