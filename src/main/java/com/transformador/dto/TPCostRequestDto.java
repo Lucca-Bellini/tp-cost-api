@@ -45,6 +45,6 @@ public class TPCostRequestDto {
     @Pattern(regexp = "^(P|M|G)$", message = "Carretel deve ser P, M ou G")
     private String carretel; // P, M, G
 
-    // Lista de insumos simples (parafusos, insertos, etc.)
+    // Lista de insumos
     private List<InsumoRequestDto> insumos;
 }

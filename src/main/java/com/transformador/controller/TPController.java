@@ -34,7 +34,7 @@ public class TPController {
     @PostMapping("/consume")
     public ResponseEntity<EstoqueResponseDto> consumeStock(@Valid @RequestBody EstoqueRequestDto request) {
         try {
-            estoqueService.validarEDebitar(request.getItens());
+            estoqueService.validarEDebitar(request.getInsumos());
             return ResponseEntity.ok(new EstoqueResponseDto(true, "Estoque debitado com sucesso"));
         } catch (EstoqueInsuficienteException e) {
             return ResponseEntity.ok(new EstoqueResponseDto(false, e.getMessage()));
