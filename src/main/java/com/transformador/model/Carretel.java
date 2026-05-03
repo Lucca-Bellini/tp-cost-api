@@ -39,7 +39,4 @@ public class Carretel {
 
     @Column(name = "secundario_largura_espira_mm", precision = 10, scale = 2)
     private BigDecimal secundarioLarguraEspiraMm;
-
-    @Column(name = "cano_massa_kg", precision = 10, scale = 3)
-    private BigDecimal canoMassaKg;
 }

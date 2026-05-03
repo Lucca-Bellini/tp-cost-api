@@ -58,7 +58,6 @@ CREATE TABLE IF NOT EXISTS carretel (
     cano_altura_mm DECIMAL(10,2),
     cano_circunferencia_mm DECIMAL(10,2),
     secundario_largura_espira_mm DECIMAL(10,2),
-    cano_massa_kg DECIMAL(10,3)
 );
 
 -- 6. TABELA: nucleo (dados do nucleo e sua fita de fixação)
@@ -154,7 +153,7 @@ INSERT INTO produto (id, codigo, nome, tipo_material, unidade_medida, disponibil
 (40, 'INS-049', 'NÚCLEO SILÍCIO', 'GERAL', 'KG', true, 3000.000, 1),
 (41, 'INS-050', 'VERNIZ', 'GERAL', 'KG', true, 15.000, 1),
 (42, 'INS-051', 'COLA', 'GERAL', 'KG', true, 10.000, 1),
-(43, 'INS-052', 'BORRACHA', 'GERAL', 'M', true, 30.000,),
+(43, 'INS-052', 'BORRACHA', 'GERAL', 'MQUADRADO', true, 45.000,),
 (44, 'INS-053', 'CANO', 'GERAL', 'M', true, 30.000, 0.675),
 (45, 'INS-054', 'TNT', 'GERAL', 'M', true, 30.000,),
 (46, 'INS-055', 'CADARÇO', 'GERAL', 'M', true, 30.000,),
@@ -222,14 +221,14 @@ INSERT INTO produto_fornecedor (id, produto_id, fornecedor_id, valor, ativo) VAL
 (42, 45, 1, 3.20, true),
 (43, 42, 1, 32.50, true),
 (44, 39, 1, 123.00, true),
-(45, 36, 1, 2.01, true),
+(45, 36, 1, 6.03, true),
 (46, 61, 2, 7.80, true),
 (47, 58, 2, 0.31, true),
 (48, 55, 2, 58.00, true),
 (49, 52, 2, 42.00, true),
 (50, 49, 2, 0.60, true),
 (51, 46, 2, 7.90, true),
-(52, 43, 2, 2.89, true),
+(52, 43, 2, 96.40, true),
 (53, 40, 2, 13.50, true),
 (54, 37, 2, 1.40, true),
 (55, 62, 4, 50.75, true),
@@ -281,10 +280,10 @@ INSERT INTO produto_cobre (codigo_produto, awg, diametro, secao, espiras_por_cm,
 ('INS-044', 44, 0.0503, 0.0020, 169.7, 0.018, 8500, 0.005);
 
 -- Carretel
-INSERT INTO carretel (tamanho, circunferencia_mm, epoxi_carretel_kg, epoxi_capa_kg, primario_papel_largura_mm, primario_largura_espira_mm, fita_latao_massa_kg, cano_altura_mm, cano_circunferencia_mm, secundario_largura_espira_mm, cano_massa_kg) VALUES
-('P', 400, 2, 4, 48, 38, 0.03, 145, 240, 135, 0.09),
-('M', 420, 3, 6, 55, 45, 0.045, 160, 250, 150, 0.105),
-('G', 440, 5, 8, 65, 55, 0.065, 200, 260, 190, 0.135);
+INSERT INTO carretel (tamanho, circunferencia_mm, epoxi_carretel_kg, epoxi_capa_kg, primario_papel_largura_mm, primario_largura_espira_mm, fita_latao_massa_kg, cano_altura_mm, cano_circunferencia_mm, secundario_largura_espira_mm) VALUES
+('P', 400, 2, 4, 48, 38, 0.03, 145, 240, 135),
+('M', 420, 3, 6, 55, 45, 0.045, 160, 250, 150),
+('G', 440, 5, 8, 65, 55, 0.065, 200, 260, 190);
 
 -- Nucleo
 INSERT INTO nucleo (tipo, massa_kg, cinta_massa_kg, cinta_metro) VALUES
