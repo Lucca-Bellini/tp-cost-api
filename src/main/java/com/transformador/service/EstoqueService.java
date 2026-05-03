@@ -35,23 +35,21 @@ public class EstoqueService {
 
         // 1. Validação de estoque para todos os insumos
         for (InsumoRequestDto insumo : insumos) {
-            try {
-                Produto produto = produtoRepository.findByCodigo(insumo.getIdInsumo())
-                        .orElseThrow(() -> new EstoqueInsuficienteException(
-                                "Produto não encontrado: " + insumo.getIdInsumo()));
-                BigDecimal estoqueAtual = produto.getEstoque() != null ? produto.getEstoque() : BigDecimal.ZERO;
-                if (estoqueAtual.compareTo(insumo.getQuantidade()) < 0) {
-                    erros.add(String.format("Estoque insuficiente para %s (%s): disponível = %.3f, necessário = %.3f",
-                            produto.getNome(), insumo.getIdInsumo(), estoqueAtual, insumo.getQuantidade()));
-                }
-            } catch (EstoqueInsuficienteException e) {
+            Produto produto = produtoRepository.findByCodigo(insumo.getIdInsumo()).orElse(null);
+            if (produto == null) {
                 erros.add("Produto não encontrado: " + insumo.getIdInsumo());
+                continue;
+            }
+            BigDecimal estoqueAtual = produto.getEstoque() != null ? produto.getEstoque() : BigDecimal.ZERO;
+            if (estoqueAtual.compareTo(insumo.getQuantidade()) < 0) {
+                erros.add(String.format("Estoque insuficiente para %s (%s): disponível = %.3f, necessário = %.3f",
+                        produto.getNome(), insumo.getIdInsumo(), estoqueAtual, insumo.getQuantidade()));
             }
         }
 
         // Se houver erros, lança uma única exceção com todos eles
         if (!erros.isEmpty()) {
-            throw new EstoqueInsuficienteException(String.join("; ", erros));
+            throw new EstoqueInsuficienteException(erros);
         }
 
         // 2. Débito (apenas após validação bem‑sucedida)

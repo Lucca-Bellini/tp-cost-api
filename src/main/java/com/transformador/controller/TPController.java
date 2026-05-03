@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Collections;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,12 +37,14 @@ public class TPController {
     public ResponseEntity<EstoqueResponseDto> consumeStock(@Valid @RequestBody EstoqueRequestDto request) {
         try {
             estoqueService.validarEDebitar(request.getInsumos());
-            return ResponseEntity.ok(new EstoqueResponseDto(true, "Estoque debitado com sucesso"));
+            return ResponseEntity
+                    .ok(new EstoqueResponseDto(true, Collections.singletonList("Estoque debitado com sucesso")));
         } catch (EstoqueInsuficienteException e) {
-            return ResponseEntity.ok(new EstoqueResponseDto(false, e.getMessage()));
+            return ResponseEntity.ok(new EstoqueResponseDto(false, e.getErros()));
         } catch (Exception e) {
             log.error("Erro inesperado no consumo de estoque", e);
-            return ResponseEntity.ok(new EstoqueResponseDto(false, "Erro interno: " + e.getMessage()));
+            return ResponseEntity
+                    .ok(new EstoqueResponseDto(false, Collections.singletonList("Erro interno: " + e.getMessage())));
         }
     }
 

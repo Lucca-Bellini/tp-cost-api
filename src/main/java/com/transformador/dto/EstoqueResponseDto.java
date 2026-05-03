@@ -1,5 +1,7 @@
 package com.transformador.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -7,5 +9,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class EstoqueResponseDto {
     private boolean sucesso;
-    private String mensagem;
+    private List<String> detalhes;
 }
